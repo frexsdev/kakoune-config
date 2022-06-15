@@ -1,0 +1,27 @@
+try %{ 
+
+	plug "gustavo-hms/peneira" %{
+		require-module peneira
+		set-option global peneira_files_command "rg --files"
+	}
+
+	plug "enricozb/tabs.kak" %{
+		set-option global modelinefmt_tabs '%val{cursor_line}:%val{cursor_char_column} {{context_info}} {{mode_info}}'
+		set-option global tabs_overlow "scroll"
+	}
+ } catch %{
+    echo -debug "Error while evaluating 'luar' configuration: %val{error}"
+
+    set-option -add current plug_conf_errors "Error while evaluating 'luar' configuration:"
+    set-option -add current plug_conf_errors %sh{ printf "\n    " }
+    set-option -add current plug_conf_errors %val{error}
+    set-option -add current plug_conf_errors %sh{ printf "\n\n" }
+
+    hook -once -group plug-conf-err global WinDisplay .* %{
+        info -style modal -title "plug.kak error" "%opt{plug_conf_errors}"
+        on-key %{
+            info -style modal
+            execute-keys -with-maps -with-hooks %val{key}
+        }
+    }
+}
